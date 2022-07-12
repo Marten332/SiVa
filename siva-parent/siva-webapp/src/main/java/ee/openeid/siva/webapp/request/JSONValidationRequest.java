@@ -28,9 +28,6 @@ public class JSONValidationRequest implements ValidationRequest {
     @ValidFilename
     private String filename;
 
-    @ValidDocumentType
-    private String documentType;
-
     @ValidSignaturePolicy
     private String signaturePolicy;
 

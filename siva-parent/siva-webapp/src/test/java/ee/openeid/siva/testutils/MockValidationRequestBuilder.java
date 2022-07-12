@@ -91,11 +91,6 @@ public class MockValidationRequestBuilder {
         }
 
         @Override
-        public String getDocumentType() {
-            return type;
-        }
-
-        @Override
         public String getSignaturePolicy() {
             return signaturePolicy;
         }

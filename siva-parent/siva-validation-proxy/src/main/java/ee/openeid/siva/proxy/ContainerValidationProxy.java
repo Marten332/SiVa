@@ -18,7 +18,6 @@ package ee.openeid.siva.proxy;
 
 import ee.openeid.siva.proxy.document.DocumentType;
 import ee.openeid.siva.proxy.document.ProxyDocument;
-import ee.openeid.siva.proxy.http.RESTProxyService;
 import ee.openeid.siva.statistics.StatisticsService;
 import ee.openeid.siva.validation.document.ValidationDocument;
 import ee.openeid.siva.validation.document.report.Reports;
@@ -35,6 +34,7 @@ import eu.europa.esig.dss.exception.IllegalInputException;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.InMemoryDocument;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+@Slf4j
 @Service
 public class ContainerValidationProxy extends ValidationProxy {
 
@@ -67,34 +68,27 @@ public class ContainerValidationProxy extends ValidationProxy {
     private static final String META_INF_FOLDER = "META-INF/";
     private static final String DOCUMENT_FORMAT_NOT_RECOGNIZED = "Document format not recognized/handled";
 
-    private final RESTProxyService restProxyService;
-
     @Autowired
-    public ContainerValidationProxy(RESTProxyService restProxyService,
-                                    StatisticsService statisticsService,
+    public ContainerValidationProxy(StatisticsService statisticsService,
                                     ApplicationContext applicationContext,
                                     Environment environment) {
         super(statisticsService, applicationContext, environment);
-        this.restProxyService = restProxyService;
     }
 
     @Override
     public SimpleReport validateRequest(ProxyRequest proxyRequest) {
         Reports reports;
         SimpleReport report;
-        if (isDocumentTypeXRoad(proxyRequest)) {
-            reports = restProxyService.validate(createValidationDocument(proxyRequest));
-            report = chooseReport(reports, proxyRequest.getReportType());
-        } else {
-            ValidationService validationService = getServiceForType(proxyRequest);
-            reports = validate(validationService, proxyRequest);
-            report = chooseReport(reports, proxyRequest.getReportType());
-            if (validationService instanceof TimeStampTokenValidationService
-                    && report.getValidationConclusion().getTimeStampTokens().stream()
-                    .allMatch(token -> token.getIndication() == TimeStampTokenValidationData.Indication.TOTAL_PASSED)) {
-                report = generateDataFileReport(proxyRequest, report);
-            }
+
+        ValidationService validationService = getServiceForType(proxyRequest);
+        reports = validate(validationService, proxyRequest);
+        report = chooseReport(reports, proxyRequest.getReportType());
+        if (validationService instanceof TimeStampTokenValidationService
+                && report.getValidationConclusion().getTimeStampTokens().stream()
+                .allMatch(token -> token.getIndication() == TimeStampTokenValidationData.Indication.TOTAL_PASSED)) {
+            report = generateDataFileReport(proxyRequest, report);
         }
+
         return report;
     }
 

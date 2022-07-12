@@ -22,8 +22,6 @@ public interface ValidationRequest {
 
     String getFilename();
 
-    String getDocumentType();
-
     String getSignaturePolicy();
 
     String getReportType();

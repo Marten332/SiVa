@@ -33,7 +33,6 @@ public class ValidationRequestToProxyDocumentTransformer {
         proxyDocument.setBytes(Base64.decodeBase64(validationRequest.getDocument()));
         proxyDocument.setSignaturePolicy(validationRequest.getSignaturePolicy());
 
-        setDocumentType(validationRequest, proxyDocument);
         setReportType(validationRequest, proxyDocument);
         return proxyDocument;
     }
@@ -44,11 +43,6 @@ public class ValidationRequestToProxyDocumentTransformer {
         } else {
             proxyDocument.setReportType(ReportType.SIMPLE);
         }
-    }
-
-    private void setDocumentType(ValidationRequest validationRequest, ProxyDocument proxyDocument) {
-        if (validationRequest.getDocumentType() != null)
-            proxyDocument.setDocumentType(DocumentTypeResolver.documentTypeFromString(validationRequest.getDocumentType()));
     }
 
 }

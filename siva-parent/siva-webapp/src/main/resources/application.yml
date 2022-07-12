@@ -4,8 +4,9 @@ spring.http.encoding.enabled: true # Enable http encoding support.
 spring.http.encoding.force: true # Force the encoding to the configured charset on HTTP requests and responses.
 
 siva:
-  proxy:
-    xroadUrl: http://localhost:8081
+  tsl:
+    loader:
+      url: http://repo.ria/tsl/trusted-test-mp.xml
 management:
   health:
     diskspace:

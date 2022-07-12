@@ -16,8 +16,6 @@
 
 package ee.openeid.siva.proxy;
 
-import ee.openeid.siva.proxy.document.DocumentType;
-import ee.openeid.siva.proxy.document.ProxyDocument;
 import ee.openeid.siva.proxy.document.ReportType;
 import ee.openeid.siva.proxy.exception.ValidatonServiceNotFoundException;
 import ee.openeid.siva.statistics.StatisticsService;
@@ -25,6 +23,7 @@ import ee.openeid.siva.validation.document.report.Reports;
 import ee.openeid.siva.validation.document.report.SimpleReport;
 import ee.openeid.siva.validation.document.report.ValidationWarning;
 import ee.openeid.siva.validation.service.ValidationService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,7 @@ import org.springframework.core.env.Profiles;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Slf4j
 public abstract class ValidationProxy {
     static final Logger LOGGER = LoggerFactory.getLogger(ValidationProxy.class);
 
@@ -60,25 +59,13 @@ public abstract class ValidationProxy {
         SimpleReport report = validateRequest(proxyRequest);
         long validationDuration = System.nanoTime() - validationStartTime;
 
-        publishStatistics(proxyRequest, report, validationDuration);
+        publishStatistics(report, validationDuration);
         addWarningForTestEnvironment(report);
         return report;
     }
 
-    private void publishStatistics(ProxyRequest proxyRequest, SimpleReport report, long validationDuration) {
-        if (isDocumentTypeXRoad(proxyRequest)) {
-            statisticsService.publishXroadValidationStatistics(validationDuration, report.getValidationConclusion());
-        } else {
-            statisticsService.publishValidationStatistic(validationDuration, report.getValidationConclusion());
-        }
-    }
-
-    boolean isDocumentTypeXRoad(ProxyRequest proxyRequest) {
-        if (proxyRequest instanceof ProxyDocument) {
-            ProxyDocument proxyDocument = (ProxyDocument) proxyRequest;
-            return proxyDocument.getDocumentType() != null && proxyDocument.getDocumentType() == DocumentType.XROAD;
-        }
-        return false;
+    private void publishStatistics(SimpleReport report, long validationDuration) {
+        statisticsService.publishValidationStatistic(validationDuration, report.getValidationConclusion());
     }
 
     private void addWarningForTestEnvironment(SimpleReport simpleReport) {
